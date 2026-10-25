@@ -58,7 +58,9 @@ button:focus-visible,.name:focus-visible{outline:3px solid var(--lilac);outline-
 .done p{color:var(--lilac);margin:6px 0}
 #status{font-size:.85rem;opacity:.75}
 footer{position:relative;z-index:1;font-size:.82rem;color:rgba(255,244,248,.6);padding:26px 0 18px}
-footer a{color:inherit}
+footer{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+footer a{color:inherit;white-space:nowrap}
+footer .copy{display:block}
 canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:100}
 @media (prefers-reduced-motion:reduce){.heart{display:none}#no.dodging{transition:none}}
 </style>
@@ -93,8 +95,8 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:100}
 </main>
 
 <footer>
-  Amol Humane &copy; <span id="year"></span>. All rights reserved. &nbsp;·&nbsp;
-  <a href="tel:+917057868144">+91 7057868144</a>
+  <span class="copy">Amol Humane &copy; <span id="year"></span>. All rights reserved.</span>
+  <a class="tel" href="tel:+917057868144">+91&nbsp;7057868144</a>
 </footer>
 
 <script>
