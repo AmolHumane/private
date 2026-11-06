@@ -68,12 +68,28 @@ button:focus-visible,.name:focus-visible{outline:3px solid var(--lilac);outline-
 .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:12px}
 .chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);padding:9px 14px;font-size:.92rem;font-weight:500}
 .chip[aria-pressed="true"]{background:linear-gradient(135deg,var(--rose),#ff8a5c);border-color:transparent;font-weight:700}
-.when{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-.when label{display:flex;flex-direction:column;gap:4px;font-size:.78rem;color:var(--lilac);text-align:left;flex:1 1 140px}
-.when input{font:inherit;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:var(--text);color-scheme:dark;min-height:44px;width:100%}
+.when{margin-bottom:14px;text-align:left}
+.when .lbl{display:block;font-size:.8rem;color:var(--lilac);margin:0 0 6px 2px}
+.cal{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:10px;margin-bottom:12px}
+.calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-weight:700;font-size:.95rem}
+.calhead button{background:rgba(255,255,255,.12);padding:0;width:34px;height:34px;border-radius:50%;font-size:1.25rem;line-height:1;color:var(--text)}
+.calhead button:disabled{opacity:.28;cursor:not-allowed}
+.calgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.wd{font-size:.68rem;color:var(--lilac);text-align:center;padding:2px 0}
+.day{background:none;color:var(--text);padding:0;height:34px;border-radius:50%;font-size:.9rem;font-weight:500}
+.day:disabled{color:rgba(255,255,255,.22);cursor:not-allowed}
+.day.today{box-shadow:inset 0 0 0 1.5px var(--peach)}
+.day[aria-pressed="true"]{background:linear-gradient(135deg,var(--rose),#ff8a5c);font-weight:700;box-shadow:none}
+#dTime{display:block;width:100%;max-width:100%;font:inherit;font-size:16px;padding:11px 38px 11px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background-color:rgba(255,255,255,.1);color:var(--text);color-scheme:dark;min-height:44px;-webkit-appearance:none;appearance:none;background-repeat:no-repeat;background-position:right 14px center;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23d6c8ff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")}
+#dTime option{background:#2a1745;color:#fff}
+.chip{padding:7px 12px;font-size:.88rem}
+.chips{gap:6px;margin-bottom:10px}
 .cta{width:100%;background:linear-gradient(135deg,var(--rose),#ff8a5c);box-shadow:0 8px 24px rgba(255,93,143,.4)}
 .cta:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
-#planStatus{font-size:.85rem;margin:8px 0 0;color:var(--peach)}
+#planStatus{font-size:.92rem;font-weight:700;margin:0 0 10px;color:#ffb3c6}
+#planStatus:empty{display:none}
+.need{outline:2px solid var(--rose);outline-offset:4px;border-radius:14px;animation:shake .4s}
+@keyframes shake{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
 .plan{position:relative}
 .plan .xbtn{display:block;position:absolute;top:6px;right:8px;background:none;padding:6px 10px;font-size:1.15rem;color:var(--lilac)}
 .plan .sub:empty{display:none}
@@ -141,16 +157,23 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:100}
         <button type="button" class="chip" data-type="Lunch" aria-pressed="false">🍽️ Lunch</button>
         <button type="button" class="chip" data-type="Dinner" aria-pressed="false">🌙 Dinner</button>
         <button type="button" class="chip" data-type="Beach" aria-pressed="false">🌊 Beach</button>
-        <button type="button" class="chip" data-type="Long drive" aria-pressed="false">🚗 Long drive</button>
         <button type="button" class="chip" data-type="Picnic" aria-pressed="false">🧺 Picnic</button>
-        <button type="button" class="chip" data-type="Surprise me" aria-pressed="false">✨ Surprise me</button>
       </div>
       <div class="when">
-        <label>Date<input type="date" id="dDate"></label>
-        <label>Time<input type="time" id="dTime"></label>
+        <span class="lbl">Pick a date</span>
+        <div class="cal">
+          <div class="calhead">
+            <button type="button" id="calPrev" aria-label="Previous month">‹</button>
+            <span id="calTitle"></span>
+            <button type="button" id="calNext" aria-label="Next month">›</button>
+          </div>
+          <div class="calgrid" id="calGrid"></div>
+        </div>
+        <label class="lbl" for="dTime">Pick a time</label>
+        <select id="dTime"><option value="">Select time</option></select>
       </div>
-      <button type="button" class="cta" id="sendPlan" disabled>Send my plan 💌</button>
-      <p id="planStatus"></p>
+      <p id="planStatus" role="alert"></p>
+      <button type="button" class="cta" id="sendPlan">Send my plan 💌</button>
       <p id="planNote"></p>
     </div>
   </div></div>
@@ -288,48 +311,111 @@ async function answer(text){
 
 /* ===== Date planner popup: works before AND after YES ===== */
 (function(){
-  let planType = '';
+  let planType = '', selDate = '', viewY = 0, viewM = 0;
   const plan = document.getElementById('plan'), modal = document.getElementById('planModal');
   const dateBtns = [...document.querySelectorAll('.datebtn')];
   const chips = [...document.querySelectorAll('.chip')];
-  const dDate = document.getElementById('dDate'), dTime = document.getElementById('dTime');
+  const dTime = document.getElementById('dTime');
+  const grid = document.getElementById('calGrid'), title = document.getElementById('calTitle');
+  const prev = document.getElementById('calPrev'), next = document.getElementById('calNext');
   const sendBtn = document.getElementById('sendPlan'), ps = document.getElementById('planStatus');
   const note = document.getElementById('planNote');
   const pad = n => String(n).padStart(2,'0');
-  const todayISO = () => { const t = new Date(); return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate()); };
+  const iso = (y,m,d) => y+'-'+pad(m+1)+'-'+pad(d);
+  const todayISO = () => { const t = new Date(); return iso(t.getFullYear(), t.getMonth(), t.getDate()); };
 
-  function problem(){                       // no past dates, and no past time today
-    if(!dDate.value) return '';
-    if(dDate.value < todayISO()) return 'Please pick today or a future date 💕';
-    if(dDate.value === todayISO() && dTime.value){
+  /* calendar: past days are disabled, so they cannot be picked */
+  function renderCal(){
+    const today = todayISO(), now = new Date();
+    title.textContent = new Date(viewY,viewM,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+    prev.disabled = (viewY === now.getFullYear() && viewM === now.getMonth());
+    next.disabled = ((viewY - now.getFullYear())*12 + viewM - now.getMonth()) >= 11;
+    grid.innerHTML = '';
+    'SMTWTFS'.split('').forEach(c=>{ const w = document.createElement('span'); w.className='wd'; w.textContent=c; grid.appendChild(w); });
+    const lead = new Date(viewY,viewM,1).getDay(), days = new Date(viewY,viewM+1,0).getDate();
+    for(let i=0;i<lead;i++) grid.appendChild(document.createElement('span'));
+    for(let d=1; d<=days; d++){
+      const v = iso(viewY,viewM,d), b = document.createElement('button');
+      b.type='button'; b.className='day' + (v===today ? ' today' : ''); b.textContent=d;
+      b.disabled = v < today;
+      b.setAttribute('aria-pressed', v===selDate ? 'true' : 'false');
+      b.setAttribute('aria-label', new Date(viewY,viewM,d).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}));
+      b.addEventListener('click',()=>{ selDate = v; renderCal(); buildTimes(); check(); });
+      grid.appendChild(b);
+    }
+  }
+  prev.addEventListener('click',()=>{ viewM--; if(viewM<0){ viewM=11; viewY--; } renderCal(); });
+  next.addEventListener('click',()=>{ viewM++; if(viewM>11){ viewM=0; viewY++; } renderCal(); });
+
+  /* time slots: for today, slots already gone are not offered at all */
+  function buildTimes(){
+    const keep = dTime.value, isToday = selDate === todayISO(), n = new Date(), nowMin = n.getHours()*60 + n.getMinutes();
+    dTime.innerHTML = '';
+    const first = document.createElement('option'); first.value=''; first.textContent='Select time'; dTime.appendChild(first);
+    let count = 0;
+    for(let mins = 7*60; mins <= 23*60+30; mins += 30){
+      if(isToday && mins <= nowMin) continue;
+      const h = Math.floor(mins/60), m = mins%60, o = document.createElement('option');
+      o.value = pad(h)+':'+pad(m); o.textContent = ((h%12)||12)+':'+pad(m)+' '+(h<12?'AM':'PM');
+      dTime.appendChild(o); count++;
+    }
+    if(!count) first.textContent = 'No time left today, pick another day';
+    dTime.value = [...dTime.options].some(o=>o.value===keep) ? keep : '';
+  }
+
+  function problem(){                       // safety net on top of the disabled days/times
+    if(!selDate) return '';
+    if(selDate < todayISO()) return 'Please pick today or a future date 💕';
+    if(selDate === todayISO() && dTime.value){
       const n = new Date(), [h,m] = dTime.value.split(':').map(Number);
       if(h*60+m <= n.getHours()*60+n.getMinutes()) return 'That time has already passed. Pick a later time ⏰';
     }
     return '';
   }
-  function check(){
-    const pr = problem(); ps.textContent = pr;
-    sendBtn.disabled = !(planType && dDate.value && dTime.value) || !!pr;
+  const secChips = document.getElementById('chips'), secCal = document.querySelector('.cal');
+  function missing(){
+    const m = [];
+    if(!planType)      m.push({el:secChips, t:'a type of date'});
+    if(!selDate)       m.push({el:secCal,   t:'a date'});
+    if(!dTime.value)   m.push({el:dTime,    t:'a time'});
+    return m;
   }
-  function openPlan(){ dDate.min = todayISO(); check(); modal.classList.add('open'); }
+  function check(){                           // clear the highlight once a section is filled in
+    [[secChips,planType],[secCal,selDate],[dTime,dTime.value]].forEach(([el,ok])=>{ if(ok) el.classList.remove('need'); });
+    ps.textContent = problem();
+  }
+
+  function openPlan(){
+    const t = new Date();
+    if(!selDate){ viewY = t.getFullYear(); viewM = t.getMonth(); }
+    else if(selDate < todayISO()){ selDate = ''; viewY = t.getFullYear(); viewM = t.getMonth(); }
+    renderCal(); buildTimes(); check(); modal.classList.add('open');
+  }
   function closePlan(){ modal.classList.remove('open'); }
   dateBtns.forEach(b=>b.addEventListener('click', openPlan));
   document.getElementById('planClose').addEventListener('click', closePlan);
   modal.addEventListener('click', e=>{ if(e.target===modal) closePlan(); });
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') closePlan(); });
 
-  dDate.min = todayISO();
   chips.forEach(c=>c.addEventListener('click',()=>{
     planType = c.dataset.type;
     chips.forEach(x=>x.setAttribute('aria-pressed', x===c ? 'true' : 'false'));
     check();
   }));
-  ['input','change'].forEach(ev=>{ dDate.addEventListener(ev,check); dTime.addEventListener(ev,check); });
+  dTime.addEventListener('change', check);
 
   sendBtn.addEventListener('click', async ()=>{
+    const miss = missing();
+    if(miss.length){                          // tell her exactly what is still needed
+      miss.forEach(x=>{ x.el.classList.remove('need'); void x.el.offsetWidth; x.el.classList.add('need'); });
+      const list = miss.map(x=>x.t);
+      ps.textContent = 'Please choose ' + (list.length>1 ? list.slice(0,-1).join(', ') + ' and ' + list[list.length-1] : list[0]) + ' 💕';
+      miss[0].el.scrollIntoView({block:'nearest', behavior:'smooth'});
+      return;
+    }
     if(problem()){ check(); return; }
     sendBtn.disabled = true; sendBtn.textContent = 'Sending…'; ps.textContent = '';
-    const [y,m,d] = dDate.value.split('-').map(Number);
+    const [y,m,d] = selDate.split('-').map(Number);
     const dateTxt = new Date(y,m-1,d).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
     const [hh,mm] = dTime.value.split(':').map(Number);
     const timeTxt = ((hh%12)||12)+':'+pad(mm)+' '+(hh<12?'AM':'PM');
