@@ -68,6 +68,11 @@ button:focus-visible,.name:focus-visible{outline:3px solid var(--lilac);outline-
 .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:12px}
 .chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);padding:9px 14px;font-size:.92rem;font-weight:500}
 .chip[aria-pressed="true"]{background:linear-gradient(135deg,var(--rose),#ff8a5c);border-color:transparent;font-weight:700}
+.msgbtn{margin-top:12px;background:linear-gradient(135deg,#efe8ff,var(--lilac));color:#2d1650;font-weight:700;font-size:1rem;padding:13px 28px;box-shadow:0 6px 22px rgba(214,200,255,.4),inset 0 0 0 2px rgba(255,255,255,.45)}
+.msgbtn:hover{transform:scale(1.04)}
+#msgText{display:block;width:100%;max-width:100%;font:inherit;font-size:16px;line-height:1.45;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:var(--text);resize:none;min-height:130px;-webkit-appearance:none;appearance:none;margin:10px 0 4px}
+#msgText::placeholder{color:rgba(255,244,248,.5)}
+.count{text-align:right;font-size:.75rem;color:var(--lilac);margin-bottom:10px}
 .when{margin-bottom:14px;text-align:left}
 .when .lbl{display:block;font-size:.8rem;color:var(--lilac);margin:0 0 6px 2px}
 .cal{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:10px;margin-bottom:12px}
@@ -82,12 +87,15 @@ button:focus-visible,.name:focus-visible{outline:3px solid var(--lilac);outline-
 .day[aria-pressed="true"]{background:linear-gradient(135deg,var(--rose),#ff8a5c);font-weight:700;box-shadow:none}
 #dTime{display:block;width:100%;max-width:100%;font:inherit;font-size:16px;padding:11px 38px 11px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background-color:rgba(255,255,255,.1);color:var(--text);color-scheme:dark;min-height:44px;-webkit-appearance:none;appearance:none;background-repeat:no-repeat;background-position:right 14px center;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23d6c8ff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")}
 #dTime option{background:#2a1745;color:#fff}
+.when .lbl.p{margin-top:12px}
+#dPlace{display:block;width:100%;max-width:100%;font:inherit;font-size:16px;padding:11px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:var(--text);min-height:44px;-webkit-appearance:none;appearance:none}
+#dPlace::placeholder{color:rgba(255,244,248,.5)}
 .chip{padding:7px 12px;font-size:.88rem}
 .chips{gap:6px;margin-bottom:10px}
 .cta{width:100%;background:linear-gradient(135deg,var(--rose),#ff8a5c);box-shadow:0 8px 24px rgba(255,93,143,.4)}
 .cta:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
-#planStatus{font-size:.92rem;font-weight:700;margin:0 0 10px;color:#ffb3c6}
-#planStatus:empty{display:none}
+#planStatus,#msgStatus{font-size:.92rem;font-weight:700;margin:0 0 10px;color:#ffb3c6}
+#planStatus:empty,#msgStatus:empty{display:none}
 .need{outline:2px solid var(--rose);outline-offset:4px;border-radius:14px;animation:shake .4s}
 @keyframes shake{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
 .plan{position:relative}
@@ -140,11 +148,23 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:100}
     <p>Your answer has been sent to Amol. Thank you for making his day. 💕</p>
 
     <button type="button" class="datebtn big" id="dateBtn2">🗓️ Plan our date</button>
+    <button type="button" class="msgbtn" id="msgBtn">💌 Write a message</button>
 
     <a class="wa" id="wa" href="https://wa.me/917057868144?text=Hi%20Amol%2C%20I%20said%20yes!%20%F0%9F%92%96" target="_blank" rel="noopener">Message Amol on WhatsApp 💬</a>
     <p id="status"></p>
   </section>
 </main>
+
+<div class="modal" id="msgModal" role="dialog" aria-modal="true" aria-label="Write a message">
+  <div class="plan" id="msgCard">
+    <button type="button" class="xbtn" id="msgClose" aria-label="Close">✕</button>
+    <h3>Write me a message 💌</h3>
+    <textarea id="msgText" maxlength="500" rows="5" placeholder="Anything you'd like to say…"></textarea>
+    <div class="count"><span id="msgCount">0</span>/500</div>
+    <p id="msgStatus" role="alert"></p>
+    <button type="button" class="cta" id="sendMsg">Send message 💌</button>
+  </div>
+</div>
 
 <div class="modal" id="planModal" role="dialog" aria-modal="true" aria-label="Plan a date"><div id="modalSlot">
     <div class="plan" id="plan">
@@ -171,6 +191,8 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:100}
         </div>
         <label class="lbl" for="dTime">Pick a time</label>
         <select id="dTime"><option value="">Select time</option></select>
+        <label class="lbl p" for="dPlace">Place (optional)</label>
+        <input type="text" id="dPlace" maxlength="80" placeholder="Any place in mind? 📍" autocomplete="off" enterkeyhint="done">
       </div>
       <p id="planStatus" role="alert"></p>
       <button type="button" class="cta" id="sendPlan">Send my plan 💌</button>
@@ -420,12 +442,13 @@ async function answer(text){
     const [hh,mm] = dTime.value.split(':').map(Number);
     const timeTxt = ((hh%12)||12)+':'+pad(mm)+' '+(hh<12?'AM':'PM');
     const who = TO ? ' from ' + TO : '';
+    const place = document.getElementById('dPlace').value.trim().replace(/\s+/g,' ').slice(0,80);
     const res = await sendMail(
       'Date plan' + who + ': ' + planType + (saidYes ? '' : ' (has not answered yet)'),
       { answer: saidYes ? 'Yes, and here is our date plan' : "Hasn't answered yet, but planned a date 😄",
-        date_type:planType, date:dateTxt, date_time:timeTxt });
+        date_type:planType, date:dateTxt, date_time:timeTxt, place:(place || 'Not specified') });
     if(res.ok){
-      planSummary = planType + ' · ' + dateTxt + ' · ' + timeTxt;
+      planSummary = planType + ' · ' + dateTxt + ' · ' + timeTxt + (place ? ' · ' + place : '');
       plan.querySelector('h3').textContent = 'Date planned! 💕';
       plan.querySelector('.sub').textContent = planSummary;
       ['chips','sendPlan'].forEach(id=>document.getElementById(id).style.display='none');
@@ -438,6 +461,37 @@ async function answer(text){
     } else {
       ps.textContent = res.msg + ' — please text Amol directly.';
       sendBtn.disabled = false; sendBtn.textContent = 'Send my plan 💌';
+    }
+  });
+})();
+
+/* ===== Message box (after YES): opens on tap, emailed on its own ===== */
+(function(){
+  const modal = document.getElementById('msgModal'), btn = document.getElementById('msgBtn');
+  const txt = document.getElementById('msgText'), cnt = document.getElementById('msgCount');
+  const st = document.getElementById('msgStatus'), send = document.getElementById('sendMsg');
+  const open = () => { st.textContent=''; modal.classList.add('open'); setTimeout(()=>txt.focus(),60); };
+  const close = () => modal.classList.remove('open');
+  btn.addEventListener('click', open);
+  document.getElementById('msgClose').addEventListener('click', close);
+  modal.addEventListener('click', e=>{ if(e.target===modal) close(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
+  txt.addEventListener('input', ()=>{ cnt.textContent = txt.value.length; txt.classList.remove('need'); st.textContent=''; });
+  send.addEventListener('click', async ()=>{
+    const text = txt.value.trim();
+    if(!text){
+      txt.classList.remove('need'); void txt.offsetWidth; txt.classList.add('need');
+      st.textContent = 'Write a little something first 💕'; return;
+    }
+    send.disabled = true; send.textContent = 'Sending…'; st.textContent = '';
+    const res = await sendMail('Message from ' + (TO || 'her'), { answer:'A personal message', message:text });
+    send.disabled = false; send.textContent = 'Send message 💌';
+    if(res.ok){
+      txt.value=''; cnt.textContent='0'; st.textContent='Sent! Thank you 💕';
+      btn.textContent='💌 Send another message';
+      setTimeout(close, 1800);
+    } else {
+      st.textContent = res.msg + ' — please text Amol directly.';
     }
   });
 })();
