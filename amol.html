@@ -52,8 +52,8 @@ h1,#msg,#ask h2,#hint{text-shadow:0 2px 14px rgba(0,0,0,.55)}
 #ask{opacity:0;transform:translateY(12px);transition:opacity .8s,transform .8s;margin-top:6px}
 #ask.show{opacity:1;transform:none}
 #ask h2{font-family:'Caveat',cursive;font-size:min(2.4rem,5vh,9vw);margin:0 0 2px}
-#hint{min-height:1.3em;color:var(--peach);font-size:.92rem;margin:2px 0 26px}
-.btns{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;align-items:center;min-height:56px}
+#hint{min-height:1.3em;color:var(--peach);font-size:.92rem;margin:2px 0 18px}
+.btns{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;align-items:center;min-height:50px}
 button{font:inherit;font-weight:700;border:0;border-radius:999px;cursor:pointer;padding:13px 26px;color:#fff;touch-action:manipulation;transition:transform .15s,box-shadow .2s}
 button:focus-visible,.name:focus-visible{outline:3px solid var(--lilac);outline-offset:3px}
 .yes{background:linear-gradient(135deg,var(--rose),#ff8a5c);box-shadow:0 8px 24px rgba(255,93,143,.45)}
@@ -61,7 +61,29 @@ button:focus-visible,.name:focus-visible{outline:3px solid var(--lilac);outline-
 .yes.big{background:linear-gradient(135deg,#ff2f78,var(--rose));font-size:1.1rem}
 #no{background:#4a3a66;color:#e8def8}
 #no.dodging{position:fixed;z-index:50;transition:left .18s ease-out,top .18s ease-out}
-.done{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 140px);min-height:calc(100svh - 140px);padding-top:30vh}
+.done{display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding:9vh 0 100px}
+.plan{width:100%;max-width:420px;margin:14px auto 4px;padding:16px 16px 18px;border-radius:20px;background:rgba(28,16,51,.64);border:1px solid rgba(255,255,255,.16);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.plan h3{font-family:'Caveat',cursive;font-size:1.9rem;margin:0 0 2px;color:var(--peach);font-weight:700}
+.plan .sub{margin:0 0 12px;font-size:.92rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:12px}
+.chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);padding:9px 14px;font-size:.92rem;font-weight:500}
+.chip[aria-pressed="true"]{background:linear-gradient(135deg,var(--rose),#ff8a5c);border-color:transparent;font-weight:700}
+.when{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.when label{display:flex;flex-direction:column;gap:4px;font-size:.78rem;color:var(--lilac);text-align:left;flex:1 1 140px}
+.when input{font:inherit;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:var(--text);color-scheme:dark;min-height:44px;width:100%}
+.cta{width:100%;background:linear-gradient(135deg,var(--rose),#ff8a5c);box-shadow:0 8px 24px rgba(255,93,143,.4)}
+.cta:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+#planStatus{font-size:.85rem;margin:8px 0 0;color:var(--peach)}
+.plan{position:relative}
+.plan .xbtn{display:block;position:absolute;top:6px;right:8px;background:none;padding:6px 10px;font-size:1.15rem;color:var(--lilac)}
+.plan .sub:empty{display:none}
+.datebtn{margin-top:12px;background:linear-gradient(135deg,#ffe9c9,var(--peach));color:#4a1d3a;font-weight:700;font-size:1rem;padding:12px 26px;box-shadow:0 6px 22px rgba(255,184,140,.5),inset 0 0 0 2px rgba(255,255,255,.45)}
+.datebtn:hover{transform:scale(1.04)}
+.datebtn.big{margin-top:16px;padding:14px 30px;font-size:1.05rem}
+#planNote{margin:8px 0 0;font-size:.95rem;color:var(--peach)}
+.modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:18px;overflow:auto;background:rgba(10,5,22,.72);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.modal.open{display:flex}
+.modal .plan{margin:auto}
 .wa{display:inline-block;margin-top:18px;padding:15px 26px;border-radius:999px;background:#25d366;color:#073b1d;font-weight:700;text-decoration:none;box-shadow:0 8px 24px rgba(37,211,102,.35)}
 .wa:focus-visible{outline:3px solid var(--lilac);outline-offset:3px}
 .done h2{font-family:'Caveat',cursive;font-size:clamp(2.4rem,10vw,3.4rem);color:var(--peach);margin:10px 0}
@@ -92,6 +114,7 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:100}
         <button class="yes" data-answer="Yes, I'm in!">Yes, I'm in! 💖</button>
         <button id="no" type="button">No</button>
       </div>
+      <button type="button" class="datebtn" id="dateBtn">🗓️ Plan a date</button>
     </div>
 
   </section>
@@ -99,10 +122,38 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:100}
   <section class="done" id="done">
     <h2>You said yes! 🎉</h2>
     <p>Your answer has been sent to Amol. Thank you for making his day. 💕</p>
-    <a class="wa" href="https://wa.me/917057868144?text=Hi%20Amol%2C%20I%20said%20yes!%20%F0%9F%92%96" target="_blank" rel="noopener">Message Amol on WhatsApp 💬</a>
+
+    <button type="button" class="datebtn big" id="dateBtn2">🗓️ Plan our date</button>
+
+    <a class="wa" id="wa" href="https://wa.me/917057868144?text=Hi%20Amol%2C%20I%20said%20yes!%20%F0%9F%92%96" target="_blank" rel="noopener">Message Amol on WhatsApp 💬</a>
     <p id="status"></p>
   </section>
 </main>
+
+<div class="modal" id="planModal" role="dialog" aria-modal="true" aria-label="Plan a date"><div id="modalSlot">
+    <div class="plan" id="plan">
+      <button type="button" class="xbtn" id="planClose" aria-label="Close">✕</button>
+      <h3>Let's make a date plan 💕</h3>
+      <p class="sub"></p>
+      <div class="chips" id="chips" role="group" aria-label="Type of date">
+        <button type="button" class="chip" data-type="Movie" aria-pressed="false">🎬 Movie</button>
+        <button type="button" class="chip" data-type="Coffee" aria-pressed="false">☕ Coffee</button>
+        <button type="button" class="chip" data-type="Lunch" aria-pressed="false">🍽️ Lunch</button>
+        <button type="button" class="chip" data-type="Dinner" aria-pressed="false">🌙 Dinner</button>
+        <button type="button" class="chip" data-type="Beach" aria-pressed="false">🌊 Beach</button>
+        <button type="button" class="chip" data-type="Long drive" aria-pressed="false">🚗 Long drive</button>
+        <button type="button" class="chip" data-type="Picnic" aria-pressed="false">🧺 Picnic</button>
+        <button type="button" class="chip" data-type="Surprise me" aria-pressed="false">✨ Surprise me</button>
+      </div>
+      <div class="when">
+        <label>Date<input type="date" id="dDate"></label>
+        <label>Time<input type="time" id="dTime"></label>
+      </div>
+      <button type="button" class="cta" id="sendPlan" disabled>Send my plan 💌</button>
+      <p id="planStatus"></p>
+      <p id="planNote"></p>
+    </div>
+  </div></div>
 
 <footer>
   <span class="copy">Amol Humane &copy; <span id="year"></span>. All rights reserved.</span>
@@ -121,6 +172,10 @@ const NO_LINES = [
   "Nice try 😏","Too slow!","Are you sure? 🥺","Wrong button 🙈","Just say yes 💕",
   "I'm shy, stop chasing me","Try the pink ones 👉","Almost got me!","Nope, not today"
 ];
+
+/* ===== Name from the link: ...amol?to=Priya  (no name = "Dear") ===== */
+const TO = (new URLSearchParams(location.search).get('to') || '').replace(/\s+/g,' ').trim().slice(0,30);
+if (TO) document.querySelector('h1').textContent = 'Hey ' + TO + ',';
 
 /* ===== Year always current ===== */
 document.getElementById('year').textContent = new Date().getFullYear();
@@ -179,7 +234,7 @@ function dodge(e){
     x = m + Math.random()*Math.max(0,maxX-m);
     y = m + Math.random()*Math.max(0,maxY-m);
     const r = {left:x,top:y,right:x+w,bottom:y+h};
-    ok = !yesBtns.some(b=>overlaps(r,b.getBoundingClientRect()));
+    ok = ![...yesBtns, document.getElementById('dateBtn')].some(b=>overlaps(r,b.getBoundingClientRect()));
   }
   no.style.left = x+'px'; no.style.top = y+'px';
   tries++;
@@ -194,32 +249,112 @@ window.addEventListener('resize',()=>{ if(no.classList.contains('dodging')) dodg
 /* ===== YES / Definitely yes ===== */
 yesBtns.forEach(b=>b.addEventListener('click',()=>answer(b.dataset.answer)));
 
-async function answer(text){
-  document.getElementById('ask-wrap').style.display='none';
-  no.style.display='none';
-  const done = document.getElementById('done'); done.style.display='flex';
-  confetti();
-  const status = document.getElementById('status');
-  if(!WEB3FORMS_KEY || WEB3FORMS_KEY.startsWith("YOUR_")){
-    status.textContent = "(Setup note: add your Web3Forms key in the code to receive answers by email.)";
-    return;
-  }
+async function sendMail(subject, fields){
+  if(!WEB3FORMS_KEY || WEB3FORMS_KEY.startsWith("YOUR_"))
+    return {ok:false, msg:"(Setup note: add your Web3Forms key in the code to receive answers by email.)"};
   try{
     const fd = new FormData();
     fd.append("access_key", WEB3FORMS_KEY);
-    fd.append("subject", "She answered: " + text);
+    fd.append("subject", subject);
     fd.append("from_name", "Proposal Page");
-    fd.append("answer", text);
-    fd.append("message", "She clicked: " + text);
-    fd.append("time", new Date().toLocaleString());
+    if(TO) fd.append("name", TO);
+    for(const k in fields) fd.append(k, fields[k]);
+    fd.append("time_sent", new Date().toLocaleString());
     const r = await fetch("https://api.web3forms.com/submit",{ method:"POST", body:fd });
     const j = await r.json();
-    status.textContent = (r.ok && j.success) ? "Sent ✓" :
-      "Couldn't send (" + (j.message || r.status) + ") — please text Amol directly.";
+    return (r.ok && j.success) ? {ok:true} : {ok:false, msg:"Couldn't send (" + (j.message || r.status) + ")"};
   }catch(e){
-    status.textContent = "No connection — please text Amol directly. 💕";
+    return {ok:false, msg:"No connection"};
   }
 }
+
+let saidYes = false, planSummary = '';
+
+async function answer(text){
+  saidYes = true;
+  document.getElementById('planModal').classList.remove('open');
+  document.getElementById('ask-wrap').style.display='none';
+  no.style.display='none';
+  const done = document.getElementById('done'); done.style.display='flex';
+  if(planSummary){ document.getElementById('dateBtn2').textContent = '✓ Date planned'; document.getElementById('planNote').textContent = 'See you there! 💕'; }
+  window.scrollTo(0,0);
+  confetti();
+  const status = document.getElementById('status');
+  const fields = { answer:text, message:(TO || 'She') + " clicked: " + text };
+  if(planSummary) fields.date_plan_already_sent = planSummary;
+  const res = await sendMail((TO || 'She') + " answered: " + text, fields);
+  status.textContent = res.ok ? "Sent ✓" : (res.msg.startsWith("(") ? res.msg : res.msg + " — please text Amol directly. 💕");
+}
+
+/* ===== Date planner popup: works before AND after YES ===== */
+(function(){
+  let planType = '';
+  const plan = document.getElementById('plan'), modal = document.getElementById('planModal');
+  const dateBtns = [...document.querySelectorAll('.datebtn')];
+  const chips = [...document.querySelectorAll('.chip')];
+  const dDate = document.getElementById('dDate'), dTime = document.getElementById('dTime');
+  const sendBtn = document.getElementById('sendPlan'), ps = document.getElementById('planStatus');
+  const note = document.getElementById('planNote');
+  const pad = n => String(n).padStart(2,'0');
+  const todayISO = () => { const t = new Date(); return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate()); };
+
+  function problem(){                       // no past dates, and no past time today
+    if(!dDate.value) return '';
+    if(dDate.value < todayISO()) return 'Please pick today or a future date 💕';
+    if(dDate.value === todayISO() && dTime.value){
+      const n = new Date(), [h,m] = dTime.value.split(':').map(Number);
+      if(h*60+m <= n.getHours()*60+n.getMinutes()) return 'That time has already passed. Pick a later time ⏰';
+    }
+    return '';
+  }
+  function check(){
+    const pr = problem(); ps.textContent = pr;
+    sendBtn.disabled = !(planType && dDate.value && dTime.value) || !!pr;
+  }
+  function openPlan(){ dDate.min = todayISO(); check(); modal.classList.add('open'); }
+  function closePlan(){ modal.classList.remove('open'); }
+  dateBtns.forEach(b=>b.addEventListener('click', openPlan));
+  document.getElementById('planClose').addEventListener('click', closePlan);
+  modal.addEventListener('click', e=>{ if(e.target===modal) closePlan(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closePlan(); });
+
+  dDate.min = todayISO();
+  chips.forEach(c=>c.addEventListener('click',()=>{
+    planType = c.dataset.type;
+    chips.forEach(x=>x.setAttribute('aria-pressed', x===c ? 'true' : 'false'));
+    check();
+  }));
+  ['input','change'].forEach(ev=>{ dDate.addEventListener(ev,check); dTime.addEventListener(ev,check); });
+
+  sendBtn.addEventListener('click', async ()=>{
+    if(problem()){ check(); return; }
+    sendBtn.disabled = true; sendBtn.textContent = 'Sending…'; ps.textContent = '';
+    const [y,m,d] = dDate.value.split('-').map(Number);
+    const dateTxt = new Date(y,m-1,d).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const [hh,mm] = dTime.value.split(':').map(Number);
+    const timeTxt = ((hh%12)||12)+':'+pad(mm)+' '+(hh<12?'AM':'PM');
+    const who = TO ? ' from ' + TO : '';
+    const res = await sendMail(
+      'Date plan' + who + ': ' + planType + (saidYes ? '' : ' (has not answered yet)'),
+      { answer: saidYes ? 'Yes, and here is our date plan' : "Hasn't answered yet, but planned a date 😄",
+        date_type:planType, date:dateTxt, date_time:timeTxt });
+    if(res.ok){
+      planSummary = planType + ' · ' + dateTxt + ' · ' + timeTxt;
+      plan.querySelector('h3').textContent = 'Date planned! 💕';
+      plan.querySelector('.sub').textContent = planSummary;
+      ['chips','sendPlan'].forEach(id=>document.getElementById(id).style.display='none');
+      plan.querySelector('.when').style.display='none';
+      dateBtns.forEach(b=>b.textContent = '✓ Date planned');
+      document.getElementById('wa').href = 'https://wa.me/917057868144?text=' +
+        encodeURIComponent('Hi Amol, I said yes! 💖 Our date: ' + planSummary);
+      note.textContent = saidYes ? 'See you there! 💕' : 'Now, back to my question… 😉';
+      setTimeout(closePlan, 2400);
+    } else {
+      ps.textContent = res.msg + ' — please text Amol directly.';
+      sendBtn.disabled = false; sendBtn.textContent = 'Send my plan 💌';
+    }
+  });
+})();
 
 /* ===== Confetti hearts ===== */
 function confetti(){
